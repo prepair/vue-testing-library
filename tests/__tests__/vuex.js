@@ -1,4 +1,5 @@
 import 'jest-dom/extend-expect'
+import Vuex from 'vuex'
 import { cleanup, render, fireEvent } from '@testing-library/vue'
 
 import VuexTest from './components/Store/VuexTest'
@@ -16,7 +17,11 @@ function renderVuexTestComponent(customStore) {
   // Render the component and merge the original store and the custom one
   // provided as a parameter. This way, we can alter some behaviors of the
   // initial implementation.
-  return render(VuexTest, { store: { ...store, ...customStore } })
+  return render(VuexTest, {}, vue => {
+    vue.use(Vuex)
+    const storeInstance = new Vuex.Store({ ...store, ...customStore })
+    return { store: storeInstance }
+  })
 }
 
 test('can render with vuex with defaults', async () => {
@@ -43,7 +48,14 @@ test('can render with vuex with custom store', async () => {
 
   // Notice how here we are not using the helper method, because there's no
   // need to do that.
-  const { getByTestId, getByText } = render(VuexTest, { store })
+  const storeInstance = new Vuex.Store(store)
+  const { getByTestId, getByText } = render(
+    VuexTest,
+    {
+      store: storeInstance
+    },
+    vue => vue.use(Vuex)
+  )
 
   await fireEvent.click(getByText('+'))
   expect(getByTestId('count-value')).toHaveTextContent('1000')

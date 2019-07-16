@@ -9,32 +9,12 @@ import {
 
 const mountedWrappers = new Set()
 
-function render(
-  TestComponent,
-  { store = null, routes = null, ...mountOptions } = {},
-  configurationCb
-) {
+function render(TestComponent, mountOptions = {}, configurationCb) {
   const localVue = createLocalVue()
-  let vuexStore = null
-  let router = null
   let additionalOptions = {}
 
-  if (store) {
-    const Vuex = require('vuex')
-    localVue.use(Vuex)
-    vuexStore = new Vuex.Store(store)
-  }
-
-  if (routes) {
-    const VueRouter = require('vue-router')
-    localVue.use(VueRouter)
-    router = new VueRouter({
-      routes
-    })
-  }
-
   if (configurationCb && typeof configurationCb === 'function') {
-    additionalOptions = configurationCb(localVue, vuexStore, router)
+    additionalOptions = configurationCb(localVue)
   }
 
   if (!mountOptions.propsData && !!mountOptions.props) {
@@ -44,8 +24,6 @@ function render(
 
   const wrapper = mount(TestComponent, {
     localVue,
-    router,
-    store: vuexStore,
     attachToDocument: true,
     sync: false,
     ...mountOptions,
