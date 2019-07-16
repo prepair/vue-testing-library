@@ -4,6 +4,8 @@ import App from './components/Router/App.vue'
 import Home from './components/Router/Home.vue'
 import About from './components/Router/About.vue'
 
+import { createLocalVue } from '@vue/test-utils'
+import VueRouter from 'vue-router'
 import { cleanup, render, fireEvent } from '@testing-library/vue'
 
 const routes = [
@@ -16,7 +18,10 @@ afterEach(cleanup)
 
 test('full app rendering/navigating', async () => {
   // Notice how we pass a `routes` object to our render function.
-  const { queryByTestId } = render(App, { routes })
+  const localVue = createLocalVue()
+  localVue.use(VueRouter)
+  const router = new VueRouter({ routes })
+  const { queryByTestId } = render(App, { localVue, router })
 
   expect(queryByTestId('location-display')).toHaveTextContent('/')
 
@@ -29,7 +34,10 @@ test('setting initial route', () => {
   // The callback function receives three parameters: the Vue instance where
   // the component is mounted, the store instance (if any) and the router
   // object.
-  const { queryByTestId } = render(App, { routes }, (vue, store, router) => {
+  const localVue = createLocalVue()
+  localVue.use(VueRouter)
+  const router = new VueRouter({ routes })
+  const { queryByTestId } = render(App, { localVue, router }, () => {
     router.push('/about')
   })
 

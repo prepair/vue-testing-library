@@ -1,4 +1,4 @@
-import { createLocalVue, mount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 
 import {
   getQueriesForElement,
@@ -9,32 +9,10 @@ import {
 
 const mountedWrappers = new Set()
 
-function render(
-  TestComponent,
-  { store = null, routes = null, ...mountOptions } = {},
-  configurationCb
-) {
-  const localVue = createLocalVue()
-  let vuexStore = null
-  let router = null
+function render(TestComponent, mountOptions = {}, configurationCb) {
   let additionalOptions = {}
-
-  if (store) {
-    const Vuex = require('vuex')
-    localVue.use(Vuex)
-    vuexStore = new Vuex.Store(store)
-  }
-
-  if (routes) {
-    const VueRouter = require('vue-router')
-    localVue.use(VueRouter)
-    router = new VueRouter({
-      routes
-    })
-  }
-
   if (configurationCb && typeof configurationCb === 'function') {
-    additionalOptions = configurationCb(localVue, vuexStore, router)
+    additionalOptions = configurationCb()
   }
 
   if (!mountOptions.propsData && !!mountOptions.props) {
@@ -43,9 +21,6 @@ function render(
   }
 
   const wrapper = mount(TestComponent, {
-    localVue,
-    router,
-    store: vuexStore,
     attachToDocument: true,
     sync: false,
     ...mountOptions,
